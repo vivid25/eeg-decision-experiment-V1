@@ -5,105 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>实验准备</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 30px;
-            padding: 60px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
-        .icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 28px;
-        }
-        .subtitle {
-            color: #7f8c8d;
-            margin-bottom: 40px;
-            font-size: 16px;
-        }
-        .timer-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-        .timer {
-            font-size: 80px;
-            font-weight: bold;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-        }
-        .info-text {
-            margin-top: 30px;
-            color: #555;
-            line-height: 1.8;
-            font-size: 15px;
-        }
+        body { font-family: 'Microsoft YaHei', sans-serif; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .container { background: white; border-radius: 30px; padding: 60px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-width: 600px; text-align: center; }
+        .timer { font-size: 80px; font-weight: bold; margin: 10px 0; font-family: 'Courier New', monospace; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">⏳</div>
-        <h1>请稍等片刻</h1>
-        <p class="subtitle">保持放松，实验即将开始</p>
-        
-        <div class="timer-box">
-            <div class="timer" id="timer">03:00</div>
-        </div>
-        
-        <div class="info-text">
-            <p>此阶段用于设备调试与基线记录。</p>
-            <p>请保持身体放松，不要进行剧烈运动。</p>
-        </div>
+        <h1>设备调试中</h1>
+        <p>请保持放松，EEG/SCR设备正在连接</p>
+        <div class="timer" id="timer">03:00</div>
     </div>
-
     <script>
-        // 设置等待时间（秒）
-        const WAIT_DURATION = 180; // 3分钟 = 180秒
-        
-        let timeLeft = WAIT_DURATION;
+        let timeLeft = 180;
         const timerEl = document.getElementById('timer');
-
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                window.location.href = 'bart-final.html';
-            }
+        const interval = setInterval(() => {
             timeLeft--;
-        }
-
-        // 初始化
-        updateTimer();
-        const interval = setInterval(updateTimer, 1000);
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            timerEl.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if (timeLeft <= 0) window.location.href = 'bart.html';
+        }, 1000);
     </script>
 </body>
 </html>
