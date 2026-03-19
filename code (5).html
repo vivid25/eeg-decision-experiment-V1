@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BART 气球风险决策任务</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 700px;
+            margin: 0 auto; /* 水平居中 */
+        }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 14px; }
+        
+        /* 移除了 exchange-rate 样式 */
+        
+        .info-bar {
+            display: flex; justify-content: space-around; background: #f8f9fa;
+            padding: 10px; border-radius: 10px; margin-bottom: 20px;
+        }
+        .info-item { text-align: center; }
+        .info-label { font-size: 12px; color: #666; }
+        .info-value { font-size: 18px; font-weight: bold; color: #2c3e50; }
+        
+        .balloon-container {
+            width: 200px; height: 250px; margin: 20px auto;
+            display: flex; justify-content: center; align-items: flex-end;
+        }
+        .balloon {
+            width: 80px; height: 100px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ee5a6f);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+        }
+        .balloon::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent; border-right: 5px solid transparent;
+            border-top: 10px solid #ee5a6f;
+        }
+        
+        .buttons {
+            display: flex; gap: 15px; justify-content: center; margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 30px; font-size: 18px; border: none;
+            border-radius: 25px; cursor: pointer; font-weight: bold;
+            color: white; transition: transform 0.2s;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-pump { background: #3498db; }
+        .btn-cashout { background: #e74c3c; }
+        
+        .msg { text-align: center; margin: 15px 0; min-height: 20px; font-weight: bold; }
+        .error { color: #e74c3c; }
+        .success { color: #27ae60; }
+        
+        .instructions {
+            background: #f8f9fa; padding: 15px; border-radius: 10px;
+            margin-top: 20px; font-size: 14px; color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎈 BART 气球风险决策任务</h1>
+        <p class="subtitle">前30轮 ｜ 风险决策基线</p>
+        
+        <!-- 汇率显示区域已移除 -->
+        
+        <div class="info-bar">
+            <div class="info-item">
+                <div class="info-label">轮数</div>
+                <div class="info-value" id="round-display">1/30</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">本轮泵数</div>
+                <div class="info-value" id="pump-display">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">本轮收益</div>
+                <div class="info-value" id="round-profit">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">累计收益</div>
+                <div class="info-value" id="total-profit">0</div>
+            </div>
+        </div>
+        
+        <div class="balloon-container">
+            <div class="balloon" id="balloon"></div>
+        </div>
+        
+        <div class="msg" id="msg"></div>
+        
+        <!-- 按钮区域 -->
+        <div class="buttons">
+            <button class="btn btn-pump" onclick="pump()">泵气 (+1000)</button>
+            <button class="btn btn-cashout" onclick="cashOut()">收钱</button>
+        </div>
+        
+        <div class="instructions">
+            <p>说明：点击"泵气"累积收益，点击"收钱"保存收益。气球可能爆炸，爆炸则收益清零。</p>
+        </div>
+    </div>
+
+    <script>
+        const COINS_PER_PUMP = 1000;
+        const TOTAL_ROUNDS = 30;
+        let currentRound = 1;
+        let currentPumps = 0;
+        let roundProfit = 0;
+        let totalProfit = 0;
+        let explosionThreshold = 0;
+        let allRoundsData = [];
+
+        function init() {
+            generateExplosionThreshold();
+            updateDisplay();
+        }
+
+        function generateExplosionThreshold() {
+            // 随机生成爆炸阈值 (1-64)
+            explosionThreshold = Math.floor(Math.random() * 64) + 1;
+        }
+
+        function pump() {
+            currentPumps++;
+            if (currentPumps >= explosionThreshold) {
+                explode();
+            } else {
+                roundProfit = currentPumps * COINS_PER_PUMP;
+                updateBalloonSize();
+                updateDisplay();
+                showMsg('', '');
+            }
+        }
+
+        function updateBalloonSize() {
+            const balloon = document.getElementById('balloon');
+            const scale = 1 + (currentPumps * 0.03);
+            balloon.style.transform = `scale(${Math.min(scale, 2.5)})`;
+        }
+
+        function explode() {
+            showMsg('💥 爆炸了！收益清零', 'error');
+            saveRoundData(true, 0);
+            setTimeout(nextRound, 1500);
+        }
+
+        function cashOut() {
+            if (currentPumps === 0) {
+                showMsg('请至少泵气一次', 'error');
+                return;
+            }
+            totalProfit += roundProfit;
+            showMsg(`✅ 成功！获得 ${roundProfit} 实验币`, 'success');
+            saveRoundData(false, roundProfit);
+            setTimeout(nextRound, 1500);
+        }
+
+        function saveRoundData(exploded, profit) {
+            allRoundsData.push({ round: currentRound, pumps: currentPumps, exploded: exploded, profit: profit });
+        }
+
+        function nextRound() {
+            if (currentRound >= TOTAL_ROUNDS) {
+                finishTask();
+                return;
+            }
+            currentRound++;
+            currentPumps = 0;
+            roundProfit = 0;
+            document.getElementById('balloon').style.transform = 'scale(1)';
+            generateExplosionThreshold();
+            updateDisplay();
+            showMsg('', '');
+        }
+
+        function updateDisplay() {
+            document.getElementById('round-display').textContent = `${currentRound}/${TOTAL_ROUNDS}`;
+            document.getElementById('pump-display').textContent = currentPumps;
+            document.getElementById('round-profit').textContent = roundProfit;
+            document.getElementById('total-profit').textContent = totalProfit;
+        }
+
+        function showMsg(text, type) {
+            const el = document.getElementById('msg');
+            el.textContent = text;
+            el.className = 'msg ' + type;
+        }
+
+        function finishTask() {
+            const data = { rounds: allRoundsData, totalProfit: totalProfit };
+            localStorage.setItem('bart_experiment_data', JSON.stringify(data));
+            alert('BART任务完成！即将进入休息环节。');
+            window.location.href = 'rest.html';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

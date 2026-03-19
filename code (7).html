@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>休息时间</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        h1 { color: #2c3e50; margin-bottom: 10px; font-size: 32px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 30px; font-size: 16px; }
+        
+        .timer-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white; padding: 30px; border-radius: 20px;
+            margin: 30px 0; box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+        }
+        .timer { font-size: 80px; font-weight: bold; margin: 10px 0; font-family: 'Courier New', monospace; }
+        
+        .task-complete {
+            background: #d4edda; border: 2px solid #c3e6cb;
+            padding: 15px; border-radius: 10px; margin: 20px 0; color: #155724;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 280px;
+            margin: 30px auto 0;
+            padding: 18px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #ccc; /* 默认灰色 */
+            color: #666;
+        }
+
+        /* 激活状态样式 */
+        .btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.active:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">☕</div>
+        <h1>请休息片刻</h1>
+        <p class="subtitle">保持放松，实验即将继续</p>
+        
+        <div class="timer-box">
+            <div class="timer" id="timer">01:00</div>
+        </div>
+        
+        <div class="task-complete" id="task-complete">
+            <p>✅ BART任务已完成</p>
+            <p>休息结束后将进入延迟折扣任务</p>
+        </div>
+
+        <!-- 修改后的按钮 -->
+        <button id="nextBtn" class="btn" disabled onclick="goNext()">
+            请等待... (01:00)
+        </button>
+    </div>
+
+    <script>
+        const REST_DURATION = 60; // 休息时长 60秒
+        
+        let timeLeft = REST_DURATION;
+        const timerEl = document.getElementById('timer');
+        const btnEl = document.getElementById('nextBtn');
+        let interval;
+
+        window.onload = function() {
+            // 检查BART数据
+            if (!localStorage.getItem('bart_experiment_data')) {
+                alert('错误：未检测到BART任务数据！');
+                window.location.href = 'bart-final.html';
+                return;
+            }
+            
+            // 开始倒计时
+            interval = setInterval(updateTimer, 1000);
+        };
+
+        function updateTimer() {
+            timeLeft--;
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 更新大号计时器
+            timerEl.textContent = timeStr;
+            
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                
+                // 时间到，激活按钮
+                btnEl.disabled = false;
+                btnEl.classList.add('active');
+                btnEl.textContent = '时间到！继续实验 →';
+            } else {
+                // 更新按钮上的倒计时文字
+                btnEl.textContent = `请等待... (${timeStr})`;
+            }
+        }
+
+        function goNext() {
+            if (timeLeft <= 0) {
+                window.location.href = 'ddt-final.html';
+            }
+        }
+    </script>
+</body>
+</html>
